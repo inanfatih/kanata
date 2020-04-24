@@ -1,6 +1,5 @@
 //TODO: authorize edilecek
 
-/*
 const { admin, db } = require('./admin');
 
 module.exports = (req, res, next) => {
@@ -35,4 +34,3 @@ module.exports = (req, res, next) => {
       return res.status(403).json(err);
     });
 };
-*/

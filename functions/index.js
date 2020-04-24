@@ -7,8 +7,9 @@ const cors = require('cors');
 app.use(cors());
 const { db } = require('./util/admin');
 
-const { getAllVideos } = require('./handlers/videos');
+const { getContents, postContent } = require('./handlers/videos');
 
-app.get('/videos', getAllVideos);
+app.get('/content', getContents);
+app.post('/content', FBAuth, postContent);
 
 exports.api = functions.https.onRequest(app);
