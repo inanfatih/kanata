@@ -5,11 +5,14 @@ const FBAuth = require('./util/FbAuth.js');
 
 const cors = require('cors');
 app.use(cors());
-const { db } = require('./util/admin');
 
-const { getContents, postContent } = require('./handlers/videos');
+const { getContents, postContent } = require('./handlers/content');
+
+const { login } = require('./handlers/users');
 
 app.get('/content', getContents);
 app.post('/content', FBAuth, postContent);
+
+app.post('/login', login);
 
 exports.api = functions.https.onRequest(app);

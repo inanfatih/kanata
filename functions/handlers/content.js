@@ -10,7 +10,7 @@ exports.getContents = (req, res) => {
         content.push({
           contentId: doc.id,
           title: doc.data().title,
-          subTitle: doc.data().subTitle,
+          subtitle: doc.data().subtitle,
           type: doc.data().type,
           description: doc.data().description,
           videoUrl: doc.data().videoUrl,
@@ -24,27 +24,20 @@ exports.getContents = (req, res) => {
 };
 
 exports.postContent = (req, res) => {
-  if (req.body.body.trim() === '') {
-    return res.status(400).json({ body: 'Body must not be empty' });
-  }
-  if (req.body.body.title() === '') {
+  if (req.body.title.trim() === '') {
     return res.status(400).json({ body: 'title must not be empty' });
   }
-  if (req.body.body.type() === '') {
-    return res.status(400).json({ body: 'type must not be empty' });
+
+  if (req.body.description.trim() === '') {
+    return res.status(400).json({ body: 'description must not be empty' });
   }
-  if (req.body.body.description() === '') {
-    return res
-      .status(400)
-      .json({ description: 'description must not be empty' });
-  }
-  if (req.body.body.image() === '') {
+  if (req.body.image.trim() === '') {
     return res.status(400).json({ body: 'image must not be empty' });
   }
 
   const newContent = {
     title: req.body.title,
-    subTitle: req.body.subTitle,
+    subtitle: req.body.subtitle,
     type: req.body.type,
     description: req.body.description,
     videoUrl: req.body.videoUrl,
@@ -56,10 +49,10 @@ exports.postContent = (req, res) => {
     .then((doc) => {
       const resContent = newContent;
       resContent.contentId = doc.id;
-      res.json({ resContent });
+      return res.json({ resContent });
     })
     .catch((err) => {
       console.error(err);
-      res.status(500).json({ error: err });
+      return res.status(500).json({ error: err });
     });
 };
