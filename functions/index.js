@@ -7,11 +7,13 @@ const cors = require('cors');
 app.use(cors());
 
 const { getContents, getContent, postContent } = require('./handlers/content');
+const { contactUs } = require('./handlers/contactUs');
 
 const { login } = require('./handlers/users');
 
 app.get('/content/:contentId', getContent);
 app.get('/content', getContents);
+app.post('/contact', contactUs);
 app.post('/content', FBAuth, postContent);
 
 app.post('/login', login);

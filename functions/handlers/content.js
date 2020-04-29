@@ -34,15 +34,8 @@ exports.getContent = (req, res) => {
       contentData = doc.data();
       contentData.contentId = doc.id;
       return res.json(contentData);
-      // return db
-      //   .collection('content')
-      //   .orderBy('createdAt', 'desc')
-      //   .where('contentId', '==', req.params.contentId)
-      //   .get();
     })
-    // .then(() => {
-    //   return res.json(contentData);
-    // })
+
     .catch((err) => {
       console.error(err);
       res.status(500).json({ error: err });
@@ -51,14 +44,16 @@ exports.getContent = (req, res) => {
 
 exports.postContent = (req, res) => {
   if (req.body.title.trim() === '') {
-    return res.status(400).json({ body: 'title must not be empty' });
+    return res.status(400).json({ title: 'title must not be empty' });
   }
 
   if (req.body.description.trim() === '') {
-    return res.status(400).json({ body: 'description must not be empty' });
+    return res
+      .status(400)
+      .json({ description: 'description must not be empty' });
   }
   if (req.body.image.trim() === '') {
-    return res.status(400).json({ body: 'image must not be empty' });
+    return res.status(400).json({ image: 'image must not be empty' });
   }
 
   const newContent = {
@@ -70,6 +65,7 @@ exports.postContent = (req, res) => {
     image: req.body.image,
     createdAt: new Date().toISOString(),
   };
+  
   db.collection('content')
     .add(newContent)
     .then((doc) => {
