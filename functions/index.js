@@ -11,6 +11,7 @@ const {
   getContent,
   postContent,
   get2d3d,
+  getSocialMedia,
   getVideos,
 } = require('./handlers/content');
 const { contactUs } = require('./handlers/contactUs');
@@ -20,6 +21,7 @@ const { login } = require('./handlers/users');
 app.get('/content/:contentId', getContent);
 app.get('/content', getContents);
 app.get('/2d3d', get2d3d);
+app.get('/social-media', getSocialMedia);
 app.get('/videos', getVideos);
 app.post('/contact', contactUs);
 app.post('/content', FBAuth, postContent);

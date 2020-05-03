@@ -66,6 +66,30 @@ exports.get2d3d = (req, res) => {
     .catch((err) => console.error(err));
 };
 
+exports.getSocialMedia = (req, res) => {
+  db.collection('content')
+    .where('type', '==', 1)
+    .orderBy('createdAt', 'desc')
+    .get()
+    .then((data) => {
+      let content = [];
+      data.forEach((doc) => {
+        content.push({
+          contentId: doc.id,
+          title: doc.data().title,
+          subtitle: doc.data().subtitle,
+          type: doc.data().type,
+          description: doc.data().description,
+          videoUrl: doc.data().videoUrl,
+          image: doc.data().image,
+          createdAt: doc.data().createdAt,
+        });
+      });
+      return res.json(content);
+    })
+    .catch((err) => console.error(err));
+};
+
 exports.getVideos = (req, res) => {
   db.collection('content')
     .where('type', '==', 3)
