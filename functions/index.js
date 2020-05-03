@@ -6,13 +6,21 @@ const FBAuth = require('./util/FbAuth.js');
 const cors = require('cors');
 app.use(cors());
 
-const { getContents, getContent, postContent } = require('./handlers/content');
+const {
+  getContents,
+  getContent,
+  postContent,
+  get2d3d,
+  getVideos,
+} = require('./handlers/content');
 const { contactUs } = require('./handlers/contactUs');
 
 const { login } = require('./handlers/users');
 
 app.get('/content/:contentId', getContent);
 app.get('/content', getContents);
+app.get('/2d3d', get2d3d);
+app.get('/videos', getVideos);
 app.post('/contact', contactUs);
 app.post('/content', FBAuth, postContent);
 

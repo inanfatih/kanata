@@ -42,6 +42,54 @@ exports.getContent = (req, res) => {
     });
 };
 
+exports.get2d3d = (req, res) => {
+  db.collection('content')
+    .where('type', '==', 2)
+    .orderBy('createdAt', 'desc')
+    .get()
+    .then((data) => {
+      let content = [];
+      data.forEach((doc) => {
+        content.push({
+          contentId: doc.id,
+          title: doc.data().title,
+          subtitle: doc.data().subtitle,
+          type: doc.data().type,
+          description: doc.data().description,
+          videoUrl: doc.data().videoUrl,
+          image: doc.data().image,
+          createdAt: doc.data().createdAt,
+        });
+      });
+      return res.json(content);
+    })
+    .catch((err) => console.error(err));
+};
+
+exports.getVideos = (req, res) => {
+  db.collection('content')
+    .where('type', '==', 3)
+    .orderBy('createdAt', 'desc')
+    .get()
+    .then((data) => {
+      let content = [];
+      data.forEach((doc) => {
+        content.push({
+          contentId: doc.id,
+          title: doc.data().title,
+          subtitle: doc.data().subtitle,
+          type: doc.data().type,
+          description: doc.data().description,
+          videoUrl: doc.data().videoUrl,
+          image: doc.data().image,
+          createdAt: doc.data().createdAt,
+        });
+      });
+      return res.json(content);
+    })
+    .catch((err) => console.error(err));
+};
+
 exports.postContent = (req, res) => {
   if (req.body.title.trim() === '') {
     return res.status(400).json({ title: 'title must not be empty' });
@@ -65,7 +113,7 @@ exports.postContent = (req, res) => {
     image: req.body.image,
     createdAt: new Date().toISOString(),
   };
-  
+
   db.collection('content')
     .add(newContent)
     .then((doc) => {
