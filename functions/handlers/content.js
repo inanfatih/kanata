@@ -2,6 +2,7 @@ const { db } = require('../util/admin');
 
 exports.getContents = (req, res) => {
   db.collection('content')
+    .orderBy('orderNo', 'desc')
     .orderBy('createdAt', 'desc')
     .get()
     .then((data) => {
@@ -14,8 +15,11 @@ exports.getContents = (req, res) => {
           type: doc.data().type,
           description: doc.data().description,
           videoUrl: doc.data().videoUrl,
-          image: doc.data().image,
+          thumbnail: doc.data().thumbnail,
+          mainImage: doc.data().mainImage,
+          imageList: doc.data().imageList,
           createdAt: doc.data().createdAt,
+          orderNo: doc.data().orderNo,
         });
       });
       return res.json(content);
@@ -45,6 +49,7 @@ exports.getContent = (req, res) => {
 exports.get2d3d = (req, res) => {
   db.collection('content')
     .where('type', '==', 2)
+    .orderBy('orderNo', 'desc')
     .orderBy('createdAt', 'desc')
     .get()
     .then((data) => {
@@ -57,8 +62,11 @@ exports.get2d3d = (req, res) => {
           type: doc.data().type,
           description: doc.data().description,
           videoUrl: doc.data().videoUrl,
-          image: doc.data().image,
+          thumbnail: doc.data().thumbnail,
+          mainImage: doc.data().mainImage,
+          imageList: doc.data().imageList,
           createdAt: doc.data().createdAt,
+          orderNo: doc.data().orderNo,
         });
       });
       return res.json(content);
@@ -69,6 +77,7 @@ exports.get2d3d = (req, res) => {
 exports.getSocialMedia = (req, res) => {
   db.collection('content')
     .where('type', '==', 1)
+    .orderBy('orderNo', 'desc')
     .orderBy('createdAt', 'desc')
     .get()
     .then((data) => {
@@ -81,8 +90,11 @@ exports.getSocialMedia = (req, res) => {
           type: doc.data().type,
           description: doc.data().description,
           videoUrl: doc.data().videoUrl,
-          image: doc.data().image,
+          thumbnail: doc.data().thumbnail,
+          mainImage: doc.data().mainImage,
+          imageList: doc.data().imageList,
           createdAt: doc.data().createdAt,
+          orderNo: doc.data().orderNo,
         });
       });
       return res.json(content);
@@ -93,6 +105,7 @@ exports.getSocialMedia = (req, res) => {
 exports.getVideos = (req, res) => {
   db.collection('content')
     .where('type', '==', 3)
+    .orderBy('orderNo', 'desc')
     .orderBy('createdAt', 'desc')
     .get()
     .then((data) => {
@@ -105,8 +118,11 @@ exports.getVideos = (req, res) => {
           type: doc.data().type,
           description: doc.data().description,
           videoUrl: doc.data().videoUrl,
-          image: doc.data().image,
+          thumbnail: doc.data().thumbnail,
+          mainImage: doc.data().mainImage,
+          imageList: doc.data().imageList,
           createdAt: doc.data().createdAt,
+          orderNo: doc.data().orderNo,
         });
       });
       return res.json(content);
@@ -119,13 +135,22 @@ exports.postContent = (req, res) => {
     return res.status(400).json({ title: 'title must not be empty' });
   }
 
+  if (req.body.type === null) {
+    return res.status(400).json({ type: 'type must not be empty' });
+  }
+
   if (req.body.description.trim() === '') {
     return res
       .status(400)
       .json({ description: 'description must not be empty' });
   }
-  if (req.body.image.trim() === '') {
-    return res.status(400).json({ image: 'image must not be empty' });
+
+  if (req.body.thumbnail.trim() === '') {
+    return res.status(400).json({ thumbnail: 'thumbnail must not be empty' });
+  }
+
+  if (req.body.orderNo === null) {
+    return res.status(400).json({ orderNo: 'orderNo must not be empty' });
   }
 
   const newContent = {
@@ -134,8 +159,11 @@ exports.postContent = (req, res) => {
     type: req.body.type,
     description: req.body.description,
     videoUrl: req.body.videoUrl,
-    image: req.body.image,
+    thumbnail: req.body.thumbnail,
+    mainImage: req.body.mainImage,
+    imageList: req.body.imageList,
     createdAt: new Date().toISOString(),
+    orderNo: req.body.orderNo,
   };
 
   db.collection('content')
