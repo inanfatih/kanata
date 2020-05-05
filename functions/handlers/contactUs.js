@@ -1,22 +1,28 @@
 const { db } = require('../util/admin');
 
 exports.contactUs = (req, res) => {
+  let errors = {};
+
   if (req.body.message.trim() === '') {
-    return res.status(400).json({ message: 'Please enter your message' });
+    errors.message = 'Please enter your message';
   }
 
   if (req.body.name.trim() === '') {
-    return res.status(400).json({ name: 'Please enter your name' });
+    errors.name = 'Please enter your name';
   }
 
   if (req.body.phone.trim() === '') {
-    return res.status(400).json({ phone: 'Please enter your phone' });
+    errors.phone = 'Please enter your phone';
   }
 
   const regEx = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
   if (!req.body.email.match(regEx)) {
-    return res.status(400).json({ email: 'Email is not valid' });
+    errors.email = 'Email is not valid';
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({ errors: errors });
   }
 
   const newMessage = {

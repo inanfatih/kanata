@@ -131,26 +131,29 @@ exports.getVideos = (req, res) => {
 };
 
 exports.postContent = (req, res) => {
+  let errors = {};
   if (req.body.title.trim() === '') {
-    return res.status(400).json({ title: 'title must not be empty' });
+    errors.title = 'title must not be empty';
   }
 
   if (req.body.type === null) {
-    return res.status(400).json({ type: 'type must not be empty' });
+    errors.type = 'type must not be empty';
   }
 
   if (req.body.description.trim() === '') {
-    return res
-      .status(400)
-      .json({ description: 'description must not be empty' });
+    errors.description = 'description must not be empty';
   }
 
   if (req.body.thumbnail.trim() === '') {
-    return res.status(400).json({ thumbnail: 'thumbnail must not be empty' });
+    errors.thumbnail = 'thumbnail must not be empty';
   }
 
   if (req.body.orderNo === null) {
-    return res.status(400).json({ orderNo: 'orderNo must not be empty' });
+    errors.orderNo = 'orderNo must not be empty';
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({ errors: errors });
   }
 
   const newContent = {
