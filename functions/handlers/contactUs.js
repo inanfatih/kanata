@@ -22,7 +22,7 @@ exports.contactUs = (req, res) => {
   }
 
   if (Object.keys(errors).length > 0) {
-    return res.status(400).json({ errors: errors });
+    return res.status(400).json({ error: errors });
   }
 
   const newMessage = {

@@ -144,9 +144,9 @@ exports.postContent = (req, res) => {
     errors.description = 'description must not be empty';
   }
 
-  if (req.body.thumbnail.trim() === '') {
-    errors.thumbnail = 'thumbnail must not be empty';
-  }
+  // if (req.body.thumbnail.trim() === '') {
+  //   errors.thumbnail = 'thumbnail must not be empty';
+  // }
 
   if (req.body.orderNo === null) {
     errors.orderNo = 'orderNo must not be empty';
