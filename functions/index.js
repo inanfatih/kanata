@@ -13,6 +13,9 @@ const {
   get2d3d,
   getSocialMedia,
   getVideos,
+  postThumbnail,
+  postMainImage,
+  postImageList,
 } = require('./handlers/content');
 const { contactUs } = require('./handlers/contactUs');
 
@@ -25,6 +28,9 @@ app.get('/social-media', getSocialMedia);
 app.get('/videos', getVideos);
 app.post('/contact', contactUs);
 app.post('/content', FBAuth, postContent);
+app.post('/image/:contentId/thumbnail', FBAuth, postThumbnail);
+app.post('/image/:contentId/mainImage', FBAuth, postMainImage);
+app.post('/image/:contentId/imageList/:index', FBAuth, postImageList);
 
 app.post('/login', login);
 
