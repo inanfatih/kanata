@@ -204,7 +204,11 @@ exports.postThumbnail = (req, res) => {
     console.log(filename);
     console.log(mimetype);
 
-    if (mimetype !== 'image/jpg' && mimetype !== 'image/png') {
+    if (
+      mimetype !== 'image/jpg' &&
+      mimetype !== 'image/png' &&
+      mimetype !== 'image/jpeg'
+    ) {
       return res.status(400).json({ error: 'Wrong file type' });
     }
 
@@ -265,7 +269,11 @@ exports.postMainImage = (req, res) => {
     console.log(filename);
     console.log(mimetype);
 
-    if (mimetype !== 'image/jpg' && mimetype !== 'image/png') {
+    if (
+      mimetype !== 'image/jpg' &&
+      mimetype !== 'image/png' &&
+      mimetype !== 'image/jpeg'
+    ) {
       return res.status(400).json({ error: 'Wrong file type' });
     }
 
@@ -325,7 +333,11 @@ exports.postImageList = (req, res) => {
     console.log(filename);
     console.log(mimetype);
 
-    if (mimetype !== 'image/jpg' && mimetype !== 'image/png') {
+    if (
+      mimetype !== 'image/jpg' &&
+      mimetype !== 'image/png' &&
+      mimetype !== 'image/jpeg'
+    ) {
       return res.status(400).json({ error: 'Wrong file type' });
     }
 
@@ -372,4 +384,40 @@ exports.postImageList = (req, res) => {
   });
 
   busboy.end(req.rawBody);
+};
+
+exports.deleteContent = (req, res) => {
+  const document = db.doc(`/content/${req.params.contentId}`);
+  document
+    .get()
+    .then((doc) => {
+      if (!doc.exists) {
+        return res.status(400).json({ error: 'Content not found' });
+      }
+      return document.delete();
+    })
+    .then(async () => {
+      const bucket = admin.storage().bucket();
+      await bucket.deleteFiles({
+        prefix: `${req.params.contentId}/`,
+      });
+
+      // // Create a reference to the file to delete
+      // var imageRef = firebase.storage().child('example.jpg');
+
+      // // Delete the file
+      // imageRef
+      //   .delete()
+      //   .then(function () {
+      //     // File deleted successfully
+      //   })
+      //   .catch(function (error) {
+      //     // Uh-oh, an error occurred!
+      //   });
+      res.json({ message: 'Content deleted successfuly' });
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json({ error: err.code });
+    });
 };

@@ -16,6 +16,7 @@ const {
   postThumbnail,
   postMainImage,
   postImageList,
+  deleteContent,
 } = require('./handlers/content');
 const { contactUs } = require('./handlers/contactUs');
 
@@ -31,7 +32,8 @@ app.post('/content', FBAuth, postContent);
 app.post('/image/:contentId/thumbnail', FBAuth, postThumbnail);
 app.post('/image/:contentId/mainImage', FBAuth, postMainImage);
 app.post('/image/:contentId/imageList/:index', FBAuth, postImageList);
-
 app.post('/login', login);
+
+app.delete('/content/:contentId', FBAuth, deleteContent);
 
 exports.api = functions.https.onRequest(app);
