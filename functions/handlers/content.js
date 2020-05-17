@@ -200,9 +200,9 @@ exports.postThumbnail = (req, res) => {
   let imageToBeUploaded = {};
 
   busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-    console.log(fieldname);
-    console.log(filename);
-    console.log(mimetype);
+    console.log('fieldname', fieldname);
+    console.log('filename', filename);
+    console.log('mimetype', mimetype);
 
     if (
       mimetype !== 'image/jpg' &&
@@ -214,16 +214,18 @@ exports.postThumbnail = (req, res) => {
 
     //image.png
     const imageExtension = filename.split('.')[filename.split('.').length - 1];
-    imageFileName = `${req.params.contentId}-thumbnail.${imageExtension}`;
+    imageFileName = `thumbnail.${imageExtension}`;
     const filepath = path.join(os.tmpdir(), imageFileName);
     imageToBeUploaded = { filepath, mimetype };
     file.pipe(fs.createWriteStream(filepath));
   });
+
   busboy.on('finish', () => {
     admin
       .storage()
       .bucket()
       .upload(imageToBeUploaded.filepath, {
+        destination: `${req.params.contentId}/${imageFileName}`,
         metadata: {
           metadata: {
             contentType: imageToBeUploaded.mimetype,
@@ -231,7 +233,7 @@ exports.postThumbnail = (req, res) => {
         },
       })
       .then(() => {
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`; // burada path'in sonuna alt=media eklemeyince o media'yi browser'da gosterebiliyoruz. Eklemezsek, browser onu indiriyor
+        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${req.params.contentId}%2F${imageFileName}?alt=media`; // burada path'in sonuna alt=media eklemeyince o media'yi browser'da gosterebiliyoruz. Eklemezsek, browser onu indiriyor
 
         return db
           .doc(`/content/${req.params.contentId}`)
@@ -279,7 +281,7 @@ exports.postMainImage = (req, res) => {
 
     //image.png
     const imageExtension = filename.split('.')[filename.split('.').length - 1];
-    imageFileName = `${req.params.contentId}-main.${imageExtension}`;
+    imageFileName = `mainImage.${imageExtension}`;
     const filepath = path.join(os.tmpdir(), imageFileName);
     imageToBeUploaded = { filepath, mimetype };
     file.pipe(fs.createWriteStream(filepath));
@@ -289,6 +291,7 @@ exports.postMainImage = (req, res) => {
       .storage()
       .bucket()
       .upload(imageToBeUploaded.filepath, {
+        destination: `${req.params.contentId}/${imageFileName}`,
         metadata: {
           metadata: {
             contentType: imageToBeUploaded.mimetype,
@@ -296,7 +299,7 @@ exports.postMainImage = (req, res) => {
         },
       })
       .then(() => {
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`; // burada path'in sonuna alt=media eklemeyince o media'yi browser'da gosterebiliyoruz. Eklemezsek, browser onu indiriyor
+        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${req.params.contentId}%2F${imageFileName}?alt=media`; // burada path'in sonuna alt=media eklemeyince o media'yi browser'da gosterebiliyoruz. Eklemezsek, browser onu indiriyor
 
         return db
           .doc(`/content/${req.params.contentId}`)
@@ -345,7 +348,7 @@ exports.postImageList = (req, res) => {
     // const imageExtension = filename.split('.')[filename.split('.').length - 1];
     // imageFileName = `${Math.round(Math.random() * 10000000)}.${imageExtension}`;
     const imageExtension = filename.split('.')[filename.split('.').length - 1];
-    imageFileName = `${req.params.contentId}-list${req.params.index}.${imageExtension}`;
+    imageFileName = `imageList-${req.params.index}.${imageExtension}`;
 
     // imageFileName = req.params.contentId + '.list' + req.params.index;
     const filepath = path.join(os.tmpdir(), imageFileName);
@@ -357,6 +360,7 @@ exports.postImageList = (req, res) => {
       .storage()
       .bucket()
       .upload(imageToBeUploaded.filepath, {
+        destination: `${req.params.contentId}/${imageFileName}`,
         metadata: {
           metadata: {
             contentType: imageToBeUploaded.mimetype,
@@ -364,7 +368,7 @@ exports.postImageList = (req, res) => {
         },
       })
       .then(() => {
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`; // burada path'in sonuna alt=media eklemeyince o media'yi browser'da gosterebiliyoruz. Eklemezsek, browser onu indiriyor
+        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${req.params.contentId}%2F${imageFileName}?alt=media`; // burada path'in sonuna alt=media eklemeyince o media'yi browser'da gosterebiliyoruz. Eklemezsek, browser onu indiriyor
 
         let contentRef = db.collection('content').doc(req.params.contentId);
 
@@ -401,20 +405,32 @@ exports.deleteContent = (req, res) => {
       await bucket.deleteFiles({
         prefix: `${req.params.contentId}/`,
       });
-
-      // // Create a reference to the file to delete
-      // var imageRef = firebase.storage().child('example.jpg');
-
-      // // Delete the file
-      // imageRef
-      //   .delete()
-      //   .then(function () {
-      //     // File deleted successfully
-      //   })
-      //   .catch(function (error) {
-      //     // Uh-oh, an error occurred!
-      //   });
-      res.json({ message: 'Content deleted successfuly' });
+    })
+    .then(() => {
+      db.collection('content')
+        .orderBy('orderNo', 'desc')
+        .orderBy('createdAt', 'desc')
+        .get()
+        .then((data) => {
+          let content = [];
+          data.forEach((doc) => {
+            content.push({
+              contentId: doc.id,
+              title: doc.data().title,
+              subtitle: doc.data().subtitle,
+              type: doc.data().type,
+              description: doc.data().description,
+              videoUrl: doc.data().videoUrl,
+              thumbnail: doc.data().thumbnail,
+              mainImage: doc.data().mainImage,
+              imageList: doc.data().imageList,
+              createdAt: doc.data().createdAt,
+              orderNo: doc.data().orderNo,
+            });
+          });
+          return res.json(content);
+        })
+        .catch((err) => console.error(err));
     })
     .catch((err) => {
       console.log(err);
