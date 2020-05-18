@@ -396,7 +396,7 @@ exports.deleteContent = (req, res) => {
     .get()
     .then((doc) => {
       if (!doc.exists) {
-        return res.status(400).json({ error: 'Content not found' });
+        return res.status(200).json({ message: 'Content not found' });
       }
       return document.delete();
     })
