@@ -183,211 +183,48 @@ exports.postContent = (req, res) => {
     });
 };
 
-// postMainImage,
-// postImageList,
+// app.post('/image/:contentId/:imageType/:imageFileName/:index', FBAuth, updateContentWithImageLinks,);
 
-// app.post('/image/:contentId/thumbnail', FBAuth, postThumbnail);
-// postThumbnail,
-exports.postThumbnail = (req, res) => {
-  const BusBoy = require('busboy');
-  const path = require('path'); //default package that is installed in any node project
-  const os = require('os');
-  const fs = require('fs'); //file system
+exports.updateContentImageLinks = async (req, res) => {
+  const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${req.params.contentId}%2F${req.params.imageFileName}?alt=media`; // burada path'in sonuna alt=media eklemeyince o media'yi browser'da gosterebiliyoruz. Eklemezsek, browser onu indiriyor
 
-  const busboy = new BusBoy({ headers: req.headers });
-
-  let imageFileName;
-  let imageToBeUploaded = {};
-
-  busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-    console.log('fieldname', fieldname);
-    console.log('filename', filename);
-    console.log('mimetype', mimetype);
-
-    if (
-      mimetype !== 'image/jpg' &&
-      mimetype !== 'image/png' &&
-      mimetype !== 'image/jpeg'
-    ) {
-      return res.status(400).json({ error: 'Wrong file type' });
-    }
-
-    //image.png
-    const imageExtension = filename.split('.')[filename.split('.').length - 1];
-    imageFileName = `thumbnail.${imageExtension}`;
-    const filepath = path.join(os.tmpdir(), imageFileName);
-    imageToBeUploaded = { filepath, mimetype };
-    file.pipe(fs.createWriteStream(filepath));
-  });
-
-  busboy.on('finish', () => {
-    admin
-      .storage()
-      .bucket()
-      .upload(imageToBeUploaded.filepath, {
-        destination: `${req.params.contentId}/${imageFileName}`,
-        metadata: {
-          metadata: {
-            contentType: imageToBeUploaded.mimetype,
-          },
-        },
-      })
-      .then(() => {
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${req.params.contentId}%2F${imageFileName}?alt=media`; // burada path'in sonuna alt=media eklemeyince o media'yi browser'da gosterebiliyoruz. Eklemezsek, browser onu indiriyor
-
-        return db
-          .doc(`/content/${req.params.contentId}`)
-          .update({ thumbnail: imageUrl });
-      })
-      .then(() => {
-        return res.json({
-          message: 'Thumbnail Image uploaded successfully',
-        });
-      })
-      .catch((err) => {
-        console.error(err);
-        return res.status(500).json({ error: err.code });
+  if (req.params.imageType === 'thumbnail') {
+    try {
+      await db
+        .doc(`/content/${req.params.contentId}`)
+        .update({ thumbnail: imageUrl });
+      return res.json({
+        message: 'Thumbnail Image uploaded successfully',
       });
-  });
-
-  busboy.end(req.rawBody);
-};
-
-// app.post('/image/:contentId/mainImage', FBAuth, postMainImage);
-// postMainImage,
-exports.postMainImage = (req, res) => {
-  const BusBoy = require('busboy');
-  const path = require('path'); //default package that is installed in any node project
-  const os = require('os');
-  const fs = require('fs'); //file system
-
-  const busboy = new BusBoy({ headers: req.headers });
-
-  let imageFileName;
-  let imageToBeUploaded = {};
-
-  busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-    console.log(fieldname);
-    console.log(filename);
-    console.log(mimetype);
-
-    if (
-      mimetype !== 'image/jpg' &&
-      mimetype !== 'image/png' &&
-      mimetype !== 'image/jpeg'
-    ) {
-      return res.status(400).json({ error: 'Wrong file type' });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: err.code });
     }
-
-    //image.png
-    const imageExtension = filename.split('.')[filename.split('.').length - 1];
-    imageFileName = `mainImage.${imageExtension}`;
-    const filepath = path.join(os.tmpdir(), imageFileName);
-    imageToBeUploaded = { filepath, mimetype };
-    file.pipe(fs.createWriteStream(filepath));
-  });
-  busboy.on('finish', () => {
-    admin
-      .storage()
-      .bucket()
-      .upload(imageToBeUploaded.filepath, {
-        destination: `${req.params.contentId}/${imageFileName}`,
-        metadata: {
-          metadata: {
-            contentType: imageToBeUploaded.mimetype,
-          },
-        },
-      })
-      .then(() => {
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${req.params.contentId}%2F${imageFileName}?alt=media`; // burada path'in sonuna alt=media eklemeyince o media'yi browser'da gosterebiliyoruz. Eklemezsek, browser onu indiriyor
-
-        return db
-          .doc(`/content/${req.params.contentId}`)
-          .update({ mainImage: imageUrl });
-      })
-      .then(() => {
-        return res.json({
-          message: 'Main Image uploaded successfully',
-        });
-      })
-      .catch((err) => {
-        console.error(err);
-        return res.status(500).json({ error: err.code });
+  } else if (req.params.imageType === 'mainImage') {
+    try {
+      await db
+        .doc(`/content/${req.params.contentId}`)
+        .update({ mainImage: imageUrl });
+      return res.json({
+        message: 'mainImage uploaded successfully',
       });
-  });
-
-  busboy.end(req.rawBody);
-};
-
-// app.post('/image/:contentId/imageList/:index', FBAuth, postImageList);
-exports.postImageList = (req, res) => {
-  const BusBoy = require('busboy');
-  const path = require('path'); //default package that is installed in any node project
-  const os = require('os');
-  const fs = require('fs'); //file system
-
-  const busboy = new BusBoy({ headers: req.headers });
-
-  let imageFileName;
-  let imageToBeUploaded = {};
-
-  busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-    console.log(fieldname);
-    console.log(filename);
-    console.log(mimetype);
-
-    if (
-      mimetype !== 'image/jpg' &&
-      mimetype !== 'image/png' &&
-      mimetype !== 'image/jpeg'
-    ) {
-      return res.status(400).json({ error: 'Wrong file type' });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: err.code });
     }
-
-    //image.png
-    // const imageExtension = filename.split('.')[filename.split('.').length - 1];
-    // imageFileName = `${Math.round(Math.random() * 10000000)}.${imageExtension}`;
-    const imageExtension = filename.split('.')[filename.split('.').length - 1];
-    imageFileName = `imageList-${req.params.index}.${imageExtension}`;
-
-    // imageFileName = req.params.contentId + '.list' + req.params.index;
-    const filepath = path.join(os.tmpdir(), imageFileName);
-    imageToBeUploaded = { filepath, mimetype };
-    file.pipe(fs.createWriteStream(filepath));
-  });
-  busboy.on('finish', () => {
-    admin
-      .storage()
-      .bucket()
-      .upload(imageToBeUploaded.filepath, {
-        destination: `${req.params.contentId}/${imageFileName}`,
-        metadata: {
-          metadata: {
-            contentType: imageToBeUploaded.mimetype,
-          },
-        },
-      })
-      .then(() => {
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${req.params.contentId}%2F${imageFileName}?alt=media`; // burada path'in sonuna alt=media eklemeyince o media'yi browser'da gosterebiliyoruz. Eklemezsek, browser onu indiriyor
-
-        let contentRef = db.collection('content').doc(req.params.contentId);
-
-        return contentRef.update({
-          imageList: admin.firestore.FieldValue.arrayUnion(imageUrl),
-        });
-      })
-      .then(() => {
-        return res.json({
-          message: 'Image List uploaded successfully',
-        });
-      })
-      .catch((err) => {
-        console.error(err);
-        return res.status(500).json({ error: err.code });
+  } else {
+    try {
+      await db
+        .doc(`/content/${req.params.contentId}`)
+        .update({ imageList: admin.firestore.FieldValue.arrayUnion(imageUrl) });
+      return res.json({
+        message: 'mainImage uploaded successfully',
       });
-  });
-
-  busboy.end(req.rawBody);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: err.code });
+    }
+  }
 };
 
 exports.deleteContent = (req, res) => {
